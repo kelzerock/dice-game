@@ -2,6 +2,7 @@
   "name": "3_task",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack"
@@ -15,5 +16,9 @@
     "typescript": "^5.8.3",
     "webpack": "^5.99.9",
     "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "js-sha3": "^0.9.3",
+    "uuid": "^11.1.0"
   }
 }
