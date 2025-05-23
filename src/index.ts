@@ -10,7 +10,7 @@ export class GameContext {
   public hashCreator: CryptoGenerator;
   public rl: ReadLineHandler;
   public randomNum: NumberGenerator;
-  public state: StateInGameState = { dice: [], isUserFirst: false }
+  public state: StateInGameState = { dices: [], computerDice: [], userDice: [], isUserFirst: false }
 
   constructor(
     initialState: GameState,

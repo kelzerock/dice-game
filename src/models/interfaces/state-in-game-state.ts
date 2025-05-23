@@ -1,4 +1,6 @@
 export interface StateInGameState {
-  dice: number[][],
+  dices: number[][],
+  userDice: number[],
+  computerDice: number[],
   isUserFirst: boolean
 }

@@ -43,7 +43,7 @@ export class InitialGameCondition implements GameState {
         errors.forEach(error => console.log(error));
         context.exit(EXIT_WITH_MISTAKE)
       }
-
+      context.state.dices.push(...dices)
       console.log('✅ Dice setup is valid!');
 
     } catch (error: unknown) {
