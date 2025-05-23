@@ -19,14 +19,15 @@ export class DetermineFirstMove implements GameState {
   private async answer(context: GameContext, hmac: string): Promise<ValidAnswer> {
 
     function isValidAnswer(input: string): input is ValidAnswer {
-      return ["0", "1", "x", "?"].includes(input);
+      return ["0", "1", "x"].includes(input);
     }
 
     function assertionValidAnswer(input: string): asserts input is ValidAnswer {
-      if (!["0", "1", "x", "?"].includes(input)) throw new Error('Answer doesn\'t equal expected data!')
+      if (!["0", "1", "x"].includes(input)) throw new Error('Answer doesn\'t equal expected data!')
     }
 
-    await customLog(`I selected a random value in the range 0..1`)
+    await customLog(`Hi, let's determine in a simple way ⚔️ who will go first!`)
+    await customLog(`I selected a random value in the range 0..1!`)
     await customLog(`(HMAC=${hmac}).`)
     await customLog(`Try to guess my selection.`)
     await customLog(`0 - 0`)
@@ -35,7 +36,8 @@ export class DetermineFirstMove implements GameState {
     await customLog(`? - help 🚑`)
     let answer = await context.rl.askQuestion(``);
 
-    while (!isValidAnswer(answer.toLowerCase())) {
+    while (typeof answer === "string" && !isValidAnswer(answer.toLowerCase())) {
+      if (answer === '?') await context.helpInfo();
       await customLog(`Hey dude 🫵 don't cheating, just input one of the next option👇:`)
       await customLog(`0 - 0`)
       await customLog(`1 - 1`)
@@ -56,7 +58,7 @@ export class DetermineFirstMove implements GameState {
     } else if (answer === "x") {
       context.exit();
     } else if (answer === "?") {
-      context.helpInfo();
+      await context.helpInfo();
     } else {
       const _exhaustiveCheck: never = answer;
     }

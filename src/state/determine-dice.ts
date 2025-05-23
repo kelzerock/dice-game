@@ -24,7 +24,7 @@ export class DetermineDice implements GameState {
 
   async askWithDataDices(context: GameContext) {
     const dices = this.filterDices(context.state.computerDice, context.state.dices);
-    const rightAnswer = [...Array.from({ length: dices.length + 1 }, (_, i) => i.toString()), 'x', '?'];
+    const rightAnswer = [...Array.from({ length: dices.length }, (_, i) => i.toString()), 'x'];
     await customLog(`Choose your dice:`)
     for (const [ind, dice] of dices.entries()) {
       await customLog(`${ind} - [${dice.join(", ")}]`)
@@ -32,15 +32,15 @@ export class DetermineDice implements GameState {
     await customLog(`X - exit`)
     await customLog(`? - help`)
     let answer = await context.rl.askQuestion(``);
-    while (!rightAnswer.includes(answer.toLowerCase())) {
+    while (typeof answer === "string" && !rightAnswer.includes(answer.toLowerCase())) {
+      if (answer === '?') await context.helpInfo();
       await customLog(`Hey dude 🫵 don't cheating, just input one of the next option👇:`)
       for (const [ind, dice] of dices.entries()) {
         await customLog(`${ind} - [${dice.join(", ")}]`)
       }
       await customLog(`X - exit 💨`)
       await customLog(`? - help 🚑`)
-      answer = await context.rl.askQuestion(`
-`);
+      answer = await context.rl.askQuestion(``);
       answer = answer.toLowerCase();
     }
 

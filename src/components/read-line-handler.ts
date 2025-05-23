@@ -1,27 +1,27 @@
 import * as readline from "node:readline/promises"
 
 import { stdin as input, stdout as output } from "node:process";
+import { customLog } from "../utils/custom-log";
 
-process.on("SIGINT", () => {
-  console.log("\nProcess interrupted with Ctrl+C");
-  // this.rl.close();
-  process.exit(0);
-});
 export class ReadLineHandler {
   private rl = readline.createInterface({ input, output });
-
-  constructor() {
-  }
 
   async askQuestion(question: string) {
     try {
       const answer = await this.rl.question(question);
       return answer;
-    } finally {
+    } catch (err) {
+      if (err.name === "AbortError") {
+        await this.close();
+      } else {
+        await customLog(`Unexpected error 👀: ${err}`);
+      }
     }
   }
 
-  close() {
+  public async close(exitCode: number = 0) {
+    await customLog("Closing game... 👀");
     this.rl.close();
+    process.exit(exitCode);
   }
 }

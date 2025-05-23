@@ -19,6 +19,10 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    fallback: {
+      util: false,
+      os: false,
+    },
   },
   externals: {
     "node:crypto": "commonjs crypto",

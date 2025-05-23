@@ -13,7 +13,7 @@ export class ResetForNewGame implements GameState {
     await customLog(`Do you want to play in this game one more time? (n/y)`);
     let answer = await context.rl.askQuestion(``)
     const rightAnswer = ['y', 'n'];
-    while (!rightAnswer.includes(answer.toLowerCase())) {
+    while (typeof answer === "string" && !rightAnswer.includes(answer.toLowerCase())) {
       await customLog(`Hey dude 🫵 don't cheating, just input one of the next option👇:`);
       await customLog(`n - no`);
       await customLog(`y - yes`);

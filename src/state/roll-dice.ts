@@ -20,7 +20,7 @@ export class RollDice implements GameState {
     this.isUserFirst = context.state.isUserFirst;
     const firstResult = await this.roll(context, 'first');
     const secondResult = await this.roll(context, 'second');
-    await this.finalResult(context, firstResult, secondResult);
+    await this.finalResult(firstResult, secondResult);
   }
 
   private computerChoose(context: GameContext, maxIndex: number): { computerNumber: string, key: string, hmac: string } {
@@ -42,7 +42,7 @@ export class RollDice implements GameState {
     await customLog(`It's time for ${player} roll.`);
     await customLog(`I selected a random value in the range 0..${maxIndex}`);
     await customLog(`My HMAC(${hmac})`);
-    const userNumber = await this.askWithDataDices(context, maxIndex);
+    const userNumber = await this.askWithDataDices(context);
     const moduleForOperation = maxIndex + STEP;
     const moduleResult = (parseInt(computerNumber) + parseInt(userNumber)) % moduleForOperation;
     const result = dice[moduleResult];
@@ -57,17 +57,18 @@ export class RollDice implements GameState {
     return result;
   }
 
-  private async askWithDataDices(context: GameContext, maxIndex: number): Promise<string> {
-    const rightAnswer = [...Array.from({ length: maxIndex + 1 }, (_, i) => i.toString()), 'x', '?'];
-    const moduleForOperation = maxIndex + STEP;
+  private async askWithDataDices(context: GameContext): Promise<string> {
+    const maxIndex = context.state.userDice.length;
+    const rightAnswer = [...Array.from({ length: maxIndex }, (_, i) => i.toString()), 'x'];
+    const moduleForOperation = maxIndex;
     await customLog(`Add your number modulo ${moduleForOperation}.:`)
     for (const num of rightAnswer) {
       await customLog(`${num} - ${num}`)
     }
-    await customLog(`X - exit 💨`)
     await customLog(`? - help 🚑`)
     let answer = await context.rl.askQuestion(``);
-    while (!rightAnswer.includes(answer.toLowerCase())) {
+    while (typeof answer === "string" && !rightAnswer.includes(answer.toLowerCase())) {
+      if (answer === '?') await context.helpInfo();
       await customLog(`Hey dude 🫵 don't cheating, just select one of the next option👇:`)
       for (const num of rightAnswer) {
         await customLog(`${num} - ${num}`)
@@ -75,20 +76,17 @@ export class RollDice implements GameState {
       await customLog(`X - exit 💨`)
       await customLog(`? - help 🚑`)
       answer = await context.rl.askQuestion(``);
-      answer = answer.toLowerCase();
     }
-
+    answer = answer.toLowerCase();
     if (answer === 'x') {
       context.exit();
-    } else if (answer === "?") {
-      context.helpInfo();
     } else {
       await customLog(`You choose the ${answer} number.`);
       return answer;
     }
   }
 
-  private async finalResult(context: GameContext, firstResult: number, secondResult: number) {
+  private async finalResult(firstResult: number, secondResult: number) {
     if (this.result.firstPlayer === this.result.secondPlayer) {
       await customLog(`It is very strange, but we don't have a winner (${firstResult} === ${secondResult})! 🙄`)
     } else {
