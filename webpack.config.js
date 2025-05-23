@@ -22,5 +22,7 @@ module.exports = {
   },
   externals: {
     "node:crypto": "commonjs crypto",
+    "node:readline/promises": "commonjs readline/promises",
+    "node:process": "commonjs process",
   },
 };

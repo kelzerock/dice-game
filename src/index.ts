@@ -1,21 +1,52 @@
-import { CryptoGenerator } from "./Components/cryptoGenerator";
+import { CryptoGenerator } from "./components/crypto-generator";
+import { NumberGenerator } from "./components/number-generator";
+import { ReadLineHandler } from "./components/read-line-handler";
+import { GameState } from "./models/interfaces/game-state";
+import { InitialGameCondition } from "./state/initial-game-condition";
 
-class App {
-  private hashCreator: CryptoGenerator;
+export class GameContext {
+  private currentState: GameState;
+  public hashCreator: CryptoGenerator;
+  public rl: ReadLineHandler;
+  public randomNum: NumberGenerator;
+  public state: { dice: number[] } = { dice: [] }
 
-  constructor() {
-    this.hashCreator = new CryptoGenerator();
+  constructor(
+    initialState: GameState,
+    hashCreator: CryptoGenerator,
+    rl: ReadLineHandler,
+    randomNum: NumberGenerator
+  ) {
+    this.currentState = initialState;
+    this.hashCreator = hashCreator;
+    this.rl = rl;
+    this.randomNum = randomNum;
   }
 
-  start() {
-    const data = process.argv.slice(2);
+  public changeState(newState: GameState): void {
+    this.currentState = newState;
+  }
 
-    if (data.length === 0) {
-      console.log('Please add dice numbers already to start this program like this "main.js 1,2,3,4,5,6 1,2,3,4,5,6 1,2,3,4,5,6". You can use another numbers')
-    }
-    console.log(this.hashCreator.getHash(""))
+  public async request(): Promise<void> {
+    await this.currentState.handle(this);
+  }
+
+  public exit(exitCode: number = 0): void {
+    this.rl.close();
+    process.exit(exitCode);
   }
 }
 
-const app = new App;
-app.start();
+const cryptoGenerator = new CryptoGenerator();
+const rlHandler = new ReadLineHandler();
+const randomNum = new NumberGenerator();
+const initialGameCondition = new InitialGameCondition();
+
+const app = new GameContext(
+  initialGameCondition,
+  cryptoGenerator,
+  rlHandler,
+  randomNum
+);
+
+app.request()

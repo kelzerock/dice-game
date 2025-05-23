@@ -10,7 +10,7 @@ export class CryptoGenerator {
     return hash.digest("hex");
   }
 
-  createHmac(secret: string) {
+  getHmac(secret: string) {
     const key = this.getHash(uuidv4());
     const hmac = createHmac("SHA3-256", key).update(secret).digest("hex");
     return { key, hmac }
