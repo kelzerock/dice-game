@@ -1,6 +1,7 @@
 import { GameContext } from "..";
 import { GameState } from "../models/interfaces/game-state";
 import { ValidAnswer } from "../models/types/valid-answer";
+import { customLog } from "../utils/custom-log";
 import { DetermineDice } from "./determine-dice";
 
 export class DetermineFirstMove implements GameState {
@@ -25,35 +26,33 @@ export class DetermineFirstMove implements GameState {
       if (!["0", "1", "x", "?"].includes(input)) throw new Error('Answer doesn\'t equal expected data!')
     }
 
-    let answer = await context.rl.askQuestion(`
-I selected a random value in the range 0..1
-(HMAC=${hmac}).
-Try to guess my selection.
-0 - 0
-1 - 1
-X - exit 💨
-? - help 🚑
-`);
+    await customLog(`I selected a random value in the range 0..1`)
+    await customLog(`(HMAC=${hmac}).`)
+    await customLog(`Try to guess my selection.`)
+    await customLog(`0 - 0`)
+    await customLog(`1 - 1`)
+    await customLog(`X - exit 💨`)
+    await customLog(`? - help 🚑`)
+    let answer = await context.rl.askQuestion(``);
 
     while (!isValidAnswer(answer.toLowerCase())) {
-      answer = await context.rl.askQuestion(`
-Hey dude 🫵 don't cheating, just input one of the next option👇:
-0 - 0
-1 - 1
-X - exit 💨
-? - help 🚑
-`);
+      await customLog(`Hey dude 🫵 don't cheating, just input one of the next option👇:`)
+      await customLog(`0 - 0`)
+      await customLog(`1 - 1`)
+      await customLog(`X - exit 💨`)
+      await customLog(`? - help 🚑`)
+      answer = await context.rl.askQuestion(``);
       answer = answer.toLowerCase();
     }
     assertionValidAnswer(answer)
     return answer;
   }
 
-  private handleAnswer(answer: ValidAnswer, key: string, computerNum: string, context: GameContext) {
+  private async handleAnswer(answer: ValidAnswer, key: string, computerNum: string, context: GameContext) {
     if (answer === "0" || answer === "1") {
       context.state.isUserFirst = answer === computerNum;
-      console.log(`My selection: ${computerNum} (KEY=${key}).`);
-      console.log(`Your selection: ${answer} ${answer === computerNum ? '😎' : '🤯'}`);
+      await customLog(`My selection: ${computerNum} (KEY=${key}).`);
+      await customLog(`Your selection: ${answer} ${answer === computerNum ? '😎' : '🤯'}`);
     } else if (answer === "x") {
       context.exit();
     } else if (answer === "?") {

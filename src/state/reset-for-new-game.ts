@@ -1,5 +1,6 @@
 import { GameContext } from "..";
 import { GameState } from "../models/interfaces/game-state";
+import { customLog } from "../utils/custom-log";
 import { DetermineFirstMove } from "./determine-first-move";
 
 export class ResetForNewGame implements GameState {
@@ -9,21 +10,21 @@ export class ResetForNewGame implements GameState {
     context.request();
   }
   private async askToReset(context: GameContext) {
-    let answer = await context.rl.askQuestion(`Do you want to play in this game one more time? (n/y)`)
+    await customLog(`Do you want to play in this game one more time? (n/y)`);
+    let answer = await context.rl.askQuestion(``)
     const rightAnswer = ['y', 'n'];
     while (!rightAnswer.includes(answer.toLowerCase())) {
-      answer = await context.rl.askQuestion(`
-Hey dude 🫵 don't cheating, just input one of the next option👇:
-n - no
-y - yes
-`);
+      await customLog(`Hey dude 🫵 don't cheating, just input one of the next option👇:`);
+      await customLog(`n - no`);
+      await customLog(`y - yes`);
+      answer = await context.rl.askQuestion(``);
       answer = answer.toLowerCase();
     }
     if (answer === 'n') {
-      console.log('Thanks for the good game! Bye!👋')
+      await customLog('Thanks for the good game! Bye!👋')
       context.exit();
     } else {
-      console.log(`Lets try to play one more time 🤠!`)
+      await customLog(`Lets try to play one more time 🤠!`)
       context.reset();
     }
   }

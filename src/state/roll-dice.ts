@@ -1,6 +1,7 @@
 import { GameContext } from "..";
 import { STEP } from "../constants/constants";
 import { GameState } from "../models/interfaces/game-state";
+import { customLog } from "../utils/custom-log";
 import { ResetForNewGame } from "./reset-for-new-game";
 
 export class RollDice implements GameState {
@@ -8,7 +9,7 @@ export class RollDice implements GameState {
   private result: { firstPlayer: number, secondPlayer: number } = { firstPlayer: 0, secondPlayer: 0 }
 
   async handle(context: GameContext): Promise<void> {
-    console.log("It's time to roll dices!🎲🎲")
+    await customLog("It's time to roll dices!🎲🎲")
 
     await this.startRoll(context)
     context.changeState(new ResetForNewGame());
@@ -19,7 +20,7 @@ export class RollDice implements GameState {
     this.isUserFirst = context.state.isUserFirst;
     const firstResult = await this.roll(context, 'first');
     const secondResult = await this.roll(context, 'second');
-    this.finalResult(context, firstResult, secondResult);
+    await this.finalResult(context, firstResult, secondResult);
   }
 
   private computerChoose(context: GameContext, maxIndex: number): { computerNumber: string, key: string, hmac: string } {
@@ -38,9 +39,9 @@ export class RollDice implements GameState {
     } else {
       player = this.isUserFirst ? 'my' : 'your'
     }
-    console.log(`It's time for ${player} roll.`);
-    console.log(`I selected a random value in the range 0..${maxIndex}`);
-    console.log(`My HMAC(${hmac})`);
+    await customLog(`It's time for ${player} roll.`);
+    await customLog(`I selected a random value in the range 0..${maxIndex}`);
+    await customLog(`My HMAC(${hmac})`);
     const userNumber = await this.askWithDataDices(context, maxIndex);
     const moduleForOperation = maxIndex + STEP;
     const moduleResult = (parseInt(computerNumber) + parseInt(userNumber)) % moduleForOperation;
@@ -48,30 +49,32 @@ export class RollDice implements GameState {
     type === 'first'
       ? this.result.firstPlayer = result
       : this.result.secondPlayer = result;
-    console.log(`My number is - ${computerNumber}`);
-    console.log(`Key(${key})`);
-    console.log(`Your selection is - ${userNumber}`);
-    console.log(`The fair number generation result is ${computerNumber} + ${userNumber} = ${moduleResult} (mod ${moduleForOperation}).`);
-    console.log(`${player} roll result is ${result}.`);
+    await customLog(`My number is - ${computerNumber}`);
+    await customLog(`Key(${key})`);
+    await customLog(`Your selection is - ${userNumber}`);
+    await customLog(`The fair number generation result is ${computerNumber} + ${userNumber} = ${moduleResult} (mod ${moduleForOperation}).`);
+    await customLog(`${player} roll result is ${result}.`);
     return result;
   }
 
   private async askWithDataDices(context: GameContext, maxIndex: number): Promise<string> {
     const rightAnswer = [...Array.from({ length: maxIndex + 1 }, (_, i) => i.toString()), 'x', '?'];
     const moduleForOperation = maxIndex + STEP;
-    let answer = await context.rl.askQuestion(`
-Add your number modulo ${moduleForOperation}.:
-${rightAnswer.map((dice) => `${dice} - ${dice}\n`).join("")}
-X - exit 💨
-? - help 🚑
-`);
+    await customLog(`Add your number modulo ${moduleForOperation}.:`)
+    for (const num of rightAnswer) {
+      await customLog(`${num} - ${num}`)
+    }
+    await customLog(`X - exit 💨`)
+    await customLog(`? - help 🚑`)
+    let answer = await context.rl.askQuestion(``);
     while (!rightAnswer.includes(answer.toLowerCase())) {
-      answer = await context.rl.askQuestion(`
-Hey dude 🫵 don't cheating, just select one of the next option👇:
-${rightAnswer.map((dice) => `${dice} - [${dice}]\n`).join("")}
-X - exit 💨
-? - help 🚑
-`);
+      await customLog(`Hey dude 🫵 don't cheating, just select one of the next option👇:`)
+      for (const num of rightAnswer) {
+        await customLog(`${num} - ${num}`)
+      }
+      await customLog(`X - exit 💨`)
+      await customLog(`? - help 🚑`)
+      answer = await context.rl.askQuestion(``);
       answer = answer.toLowerCase();
     }
 
@@ -80,23 +83,23 @@ X - exit 💨
     } else if (answer === "?") {
       context.helpInfo();
     } else {
-      console.log(`You choose the ${answer} number.`);
+      await customLog(`You choose the ${answer} number.`);
       return answer;
     }
   }
 
-  private finalResult(context: GameContext, firstResult: number, secondResult: number) {
+  private async finalResult(context: GameContext, firstResult: number, secondResult: number) {
     if (this.result.firstPlayer === this.result.secondPlayer) {
-      console.log(`It is very strange, but we don't have a winner (${firstResult} === ${secondResult})! 🙄`)
+      await customLog(`It is very strange, but we don't have a winner (${firstResult} === ${secondResult})! 🙄`)
     } else {
       if (this.isUserFirst && this.result.firstPlayer > this.result.secondPlayer) {
-        console.log(`You win (${firstResult} > ${secondResult})!🥈🏆🥉`)
+        await customLog(`You win (${firstResult} > ${secondResult})!🥈🏆🥉`)
       } else if (this.isUserFirst && this.result.firstPlayer < this.result.secondPlayer) {
-        console.log(`You lose 🥴 (${firstResult} < ${secondResult})! 🥉`)
+        await customLog(`You lose 🥴 (${firstResult} < ${secondResult})! 🥉`)
       } else if (!this.isUserFirst && this.result.firstPlayer > this.result.secondPlayer) {
-        console.log(`You lose 🥴 (${firstResult} > ${secondResult})! 🥉`)
+        await customLog(`You lose 🥴 (${firstResult} > ${secondResult})! 🥉`)
       } else {
-        console.log(`You win (${firstResult} < ${secondResult})!🥈🏆🥉`)
+        await customLog(`You win (${firstResult} < ${secondResult})!🥈🏆🥉`)
       }
     }
   }
