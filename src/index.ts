@@ -2,6 +2,7 @@ import { CryptoGenerator } from "./components/crypto-generator";
 import { NumberGenerator } from "./components/number-generator";
 import { ReadLineHandler } from "./components/read-line-handler";
 import { GameState } from "./models/interfaces/game-state";
+import { StateInGameState } from "./models/interfaces/state-in-game-state";
 import { InitialGameCondition } from "./state/initial-game-condition";
 
 export class GameContext {
@@ -9,7 +10,7 @@ export class GameContext {
   public hashCreator: CryptoGenerator;
   public rl: ReadLineHandler;
   public randomNum: NumberGenerator;
-  public state: { dice: number[] } = { dice: [] }
+  public state: StateInGameState = { dice: [], isUserFirst: false }
 
   constructor(
     initialState: GameState,
@@ -34,6 +35,10 @@ export class GameContext {
   public exit(exitCode: number = 0): void {
     this.rl.close();
     process.exit(exitCode);
+  }
+
+  public helpInfo() {
+    console.log('help info')
   }
 }
 

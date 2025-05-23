@@ -11,6 +11,7 @@ export class InitialGameCondition implements GameState {
     const initialGameCondition = argv.slice(2);
     this.checkInitialData(initialGameCondition, context)
     context.changeState(new DetermineFirstMove())
+    context.request();
   }
 
   checkInitialData(initialGameData: string[], context: GameContext) {

@@ -1,0 +1,1 @@
+export type ValidAnswer = "0" | "1" | "x" | "?";
