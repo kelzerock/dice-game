@@ -40,6 +40,10 @@ export class GameContext {
   public helpInfo() {
     console.log('help info')
   }
+
+  public reset() {
+    this.state = { ...this.state, computerDice: [], userDice: [], isUserFirst: false }
+  }
 }
 
 const cryptoGenerator = new CryptoGenerator();

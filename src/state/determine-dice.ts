@@ -4,7 +4,7 @@ import { RollDice } from "./roll-dice";
 
 export class DetermineDice implements GameState {
   async handle(context: GameContext): Promise<void> {
-    this.startDetermine(context);
+    await this.startDetermine(context);
     context.changeState(new RollDice);
     context.request();
   }

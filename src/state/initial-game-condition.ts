@@ -4,24 +4,27 @@ import { argv } from 'node:process';
 import { stringToNumbers } from "../utils/string-to-numbers";
 import { EXIT_WITH_MISTAKE, MIN_NUMBERS_ON_DICE } from "../constants/constants";
 import { DetermineFirstMove } from "./determine-first-move";
+import { customLog } from "../utils/custom-log";
 
 export class InitialGameCondition implements GameState {
   async handle(context: GameContext): Promise<void> {
-    console.log(`👋 Hi, this is the dice game! Let's start to game!🚀`)
+    await customLog(`👋 Hi, this is the dice game! Let's start to game!🚀`)
     const initialGameCondition = argv.slice(2);
-    this.checkInitialData(initialGameCondition, context)
+    await this.checkInitialData(initialGameCondition, context)
     context.changeState(new DetermineFirstMove())
     context.request();
   }
 
-  checkInitialData(initialGameData: string[], context: GameContext) {
+  private async checkInitialData(initialGameData: string[], context: GameContext) {
     let errors: string[] = [];
 
     if (initialGameData.length < 3) {
       errors.push(`❌ For starting game, you need to pass 3 or more dices with at least ${MIN_NUMBERS_ON_DICE} faces.`);
       errors.push('💡 Example: "node main.js 1,2,3,4,5,6 2,3,4,5,6,7 6,5,4,3,2,1"');
       errors.push('✅ Important: Numbers on dice can be anything, no need to repeat the examples.');
-      errors.forEach(error => console.log(error));
+      for (const error of errors) {
+        await customLog(error);
+      }
       context.exit(EXIT_WITH_MISTAKE);
     }
 
@@ -40,17 +43,19 @@ export class InitialGameCondition implements GameState {
       });
 
       if (errors.length > 0) {
-        errors.forEach(error => console.log(error));
+        for (const error of errors) {
+          await customLog(error);
+        }
         context.exit(EXIT_WITH_MISTAKE)
       }
       context.state.dices.push(...dices)
-      console.log('✅ Dice setup is valid!');
+      await customLog('✅ Dice setup is valid!');
 
     } catch (error: unknown) {
       if (error instanceof Error) {
-        console.log(error.message);
+        await customLog(error.message);
       } else {
-        console.log('❌ Unexpected error during game initialization!');
+        await customLog('❌ Unexpected error during game initialization!');
       }
     }
   }
