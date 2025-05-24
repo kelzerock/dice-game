@@ -31,7 +31,7 @@ export class RollDice implements GameState {
   }
 
   private async roll(context: GameContext, type: Roll): Promise<void> {
-    const maxIndex = context.state.computerDice.length - STEP;
+    const maxIndex = context.state.computerDice.dice.length - STEP;
     const { computerNumber, key, hmac } = this.computerChoose(context, maxIndex)
     const { player, dice } = this.getPlayerData(context, type);
     await customLog([
@@ -41,7 +41,7 @@ export class RollDice implements GameState {
     const userNumber = await this.askWithDataDices(context);
     const moduleForOperation = maxIndex + STEP;
     const moduleResult = (parseInt(computerNumber) + parseInt(userNumber)) % moduleForOperation;
-    const result = dice[moduleResult];
+    const result = dice.dice[moduleResult];
     this.setResult(type, result);
     await customLog([
       `My number is - ${computerNumber}`,
@@ -52,7 +52,7 @@ export class RollDice implements GameState {
   }
 
   private async askWithDataDices(context: GameContext): Promise<string> {
-    const maxIndex = context.state.userDice.length;
+    const maxIndex = context.state.userDice.dice.length;
     const rightAnswer = [...Array.from({ length: maxIndex }, (_, i) => i.toString()), 'x'];
     const moduleForOperation = maxIndex;
     await customLog(`Add your number modulo ${moduleForOperation}.:`)

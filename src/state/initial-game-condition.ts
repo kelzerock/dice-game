@@ -30,8 +30,9 @@ export class InitialGameCondition implements GameState {
       });
 
       await this.writeMessage(errors);
-
-      this.context.state.dices.push(...dices);
+      dices.forEach((dice, index) => {
+        this.context.state.dices.push({ id: index, dice });
+      })
       await customLog('✅ Dice setup is valid!');
 
     } catch (error: unknown) {

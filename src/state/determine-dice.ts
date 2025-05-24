@@ -1,5 +1,6 @@
 import { GameContext } from "..";
 import { EXIT_WITH_MISTAKE } from "../constants/constants";
+import { Dice } from "../models/interfaces/dice";
 import { GameState } from "../models/interfaces/game-state";
 import { assertionValidAnswer } from "../utils/assertion-valid-answer";
 import { customLog } from "../utils/custom-log";
@@ -17,10 +18,10 @@ export class DetermineDice implements GameState {
     if (context.state.isUserFirst) {
       await this.askWithDataDices(context);
       await this.computerDetermineDice(context);
-      await customLog(`I choose the [${context.state.computerDice}] dice 👹.`)
+      await customLog(`I choose the [${context.state.computerDice.dice}] dice 👹.`)
     } else {
       await this.computerDetermineDice(context);
-      await customLog(`I make the first move and choose the [${context.state.computerDice}] dice 👹.`);
+      await customLog(`I make the first move and choose the [${context.state.computerDice.dice}] dice 👹.`);
       await this.askWithDataDices(context);
     }
   }
@@ -30,7 +31,7 @@ export class DetermineDice implements GameState {
     const rightAnswer = [...Array.from({ length: dices.length }, (_, i) => i.toString()), 'x'] as const;
     await customLog(`Choose your dice:`)
     for (const [ind, dice] of dices.entries()) {
-      await customLog(`${ind} - [${dice.join(", ")}]`)
+      await customLog(`${ind} - [${dice.dice.join(", ")}]`)
     }
     await customLog([`X - exit`, `? - help`])
     let answer = await context.rl.askQuestion(``);
@@ -38,7 +39,7 @@ export class DetermineDice implements GameState {
       if (answer === '?') await context.helpInfo();
       await customLog(`Hey dude 🫵 don't cheating, just input one of the next option👇:`)
       for (const [ind, dice] of dices.entries()) {
-        await customLog(`${ind} - [${dice.join(", ")}]`)
+        await customLog(`${ind} - [${dice.dice.join(", ")}]`)
       }
       await customLog([`X - exit 💨`, `? - help 🚑`])
       answer = await context.rl.askQuestion(``);
@@ -54,8 +55,8 @@ export class DetermineDice implements GameState {
     if (answer === 'x') {
       context.exit();
     } else {
-      context.state.userDice.push(...dices[parseInt(answer)]);
-      await customLog(`You choose the [${context.state.userDice}] dice.`);
+      context.state.userDice = { id: parseInt(answer), dice: dices[parseInt(answer)].dice };
+      await customLog(`You choose the [${context.state.userDice.dice}] dice.`);
     }
   }
 
@@ -63,12 +64,11 @@ export class DetermineDice implements GameState {
     const dices = this.filterDices(context.state.userDice, context.state.dices,)
     const maxIndex = dices.length - 1;
     const computerInd = Math.floor(Math.random() * (maxIndex + 1));
-    const computerDice = dices[computerInd];
-    context.state.computerDice.push(...computerDice);
-    return computerDice;
+    const dice = dices[computerInd].dice;
+    context.state.computerDice = { id: computerInd, dice };
   }
 
-  private filterDices(excludeDice: number[], allDices: number[][]): number[][] {
-    return allDices.filter(dice => dice.toString() !== excludeDice.toString());
+  private filterDices(excludeDice: Dice, allDices: Dice[]): Dice[] {
+    return allDices.filter(dice => dice.id !== excludeDice?.id);
   }
 }

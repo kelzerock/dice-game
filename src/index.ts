@@ -14,7 +14,7 @@ export class GameContext {
   public rl: ReadLineHandler;
   public randomNum: NumberGenerator;
   private probabilityCalculator: ProbabilityCalculator;
-  public state: StateInGameState = { dices: [], computerDice: [], userDice: [], isUserFirst: false }
+  public state: StateInGameState = { dices: [], computerDice: null, userDice: null, isUserFirst: false }
 
   constructor(
     initialState: GameState,
@@ -50,7 +50,7 @@ export class GameContext {
     dices.forEach(dice => {
       const leftHeader = dice.toString();
       const row: string[] = [];
-      dices.forEach(el => row.push(this.probabilityCalculator.calculationProbability(dice, el)))
+      dices.forEach(el => row.push(this.probabilityCalculator.calculationProbability(dice.dice, el.dice)))
       table.push(
         { [leftHeader]: row }
       )
@@ -75,7 +75,7 @@ export class GameContext {
   }
 
   public reset() {
-    this.state = { ...this.state, computerDice: [], userDice: [], isUserFirst: false };
+    this.state = { ...this.state, computerDice: null, userDice: null, isUserFirst: false };
   }
 }
 

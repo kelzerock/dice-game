@@ -1,6 +1,9 @@
+import { Dice } from "./dice";
+
 export interface StateInGameState {
-  dices: number[][],
-  userDice: number[],
-  computerDice: number[],
+  dices: Dice[],
+  userDice: Dice | null,
+  computerDice: Dice | null,
   isUserFirst: boolean
 }
+
