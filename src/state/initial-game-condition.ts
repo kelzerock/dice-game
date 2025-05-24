@@ -41,9 +41,10 @@ export class InitialGameCondition implements GameState {
 
   private async mainCheckInputData(initialData: string[]): Promise<void> {
     if (initialData.length < 3) {
-      await customLog(`❌ For starting game, you need to pass 3 or more dices with at least ${MIN_NUMBERS_ON_DICE} faces.`);
-      await customLog('💡 Example: "node main.js 1,2,3,4,5,6 2,3,4,5,6,7 6,5,4,3,2,1"');
-      await customLog('✅ Important: Numbers on dice can be anything, no need to repeat the examples.');
+      await customLog([
+        `❌ For starting game, you need to pass 3 or more dices with at least ${MIN_NUMBERS_ON_DICE} faces.`,
+        '💡 Example: "node main.js 1,2,3,4,5,6 2,3,4,5,6,7 6,5,4,3,2,1"',
+        '✅ Important: Numbers on dice can be anything, no need to repeat the examples.']);
       this.context.exit(EXIT_WITH_MISTAKE);
       return;
     }
