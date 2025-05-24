@@ -21,7 +21,6 @@ export class ResetForNewGame implements GameState {
       answer = answer.toLowerCase();
     }
     if (answer === 'n') {
-      await customLog('Thanks for the good game! Bye!👋')
       context.exit();
     } else {
       await customLog(`Lets try to play one more time 🤠!`)
