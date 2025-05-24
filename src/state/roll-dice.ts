@@ -53,15 +53,15 @@ export class RollDice implements GameState {
 
   private async askWithDataDices(context: GameContext): Promise<string> {
     const maxIndex = context.state.userDice.dice.length;
-    const rightAnswer = [...Array.from({ length: maxIndex }, (_, i) => i.toString()), 'x'];
+    const rightAnswer = [...Array.from({ length: maxIndex }, (_, i) => i.toString())];
     const moduleForOperation = maxIndex;
     await customLog(`Add your number modulo ${moduleForOperation}.:`)
     for (const num of rightAnswer) {
       await customLog(`${num} - ${num}`)
     }
-    await customLog(`? - help 🚑`)
+    await customLog([`X - exit 💨`, `? - help 🚑`])
     let answer = await context.rl.askQuestion(``);
-    while (typeof answer === "string" && !rightAnswer.includes(answer.toLowerCase())) {
+    while (typeof answer === "string" && ![...rightAnswer, 'x'].includes(answer.toLowerCase())) {
       if (answer === '?') await context.helpInfo();
       await customLog(`Hey dude 🫵 don't cheating, just select one of the next option👇:`)
       for (const num of rightAnswer) {

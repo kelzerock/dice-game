@@ -28,14 +28,14 @@ export class DetermineDice implements GameState {
 
   async askWithDataDices(context: GameContext) {
     const dices = this.filterDices(context.state.computerDice, context.state.dices);
-    const rightAnswer = [...Array.from({ length: dices.length }, (_, i) => i.toString()), 'x'] as const;
+    const rightAnswer = [...Array.from({ length: dices.length }, (_, i) => i.toString())] as const;
     await customLog(`Choose your dice:`)
     for (const [ind, dice] of dices.entries()) {
       await customLog(`${ind} - [${dice.dice.join(", ")}]`)
     }
     await customLog([`X - exit`, `? - help`])
     let answer = await context.rl.askQuestion(``);
-    while (typeof answer === "string" && !isValidAnswer(answer, rightAnswer)) {
+    while (typeof answer === "string" && !isValidAnswer(answer, [...rightAnswer, 'x'])) {
       if (answer === '?') await context.helpInfo();
       await customLog(`Hey dude 🫵 don't cheating, just input one of the next option👇:`)
       for (const [ind, dice] of dices.entries()) {
@@ -47,7 +47,7 @@ export class DetermineDice implements GameState {
     }
 
     try {
-      assertionValidAnswer(answer, rightAnswer);
+      assertionValidAnswer(answer, [...rightAnswer, 'x']);
     } catch (error) {
       context.exit(EXIT_WITH_MISTAKE)
     }

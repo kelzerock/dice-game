@@ -45,10 +45,10 @@ export class GameContext {
   public async helpInfo() {
     const dices = structuredClone(this.state.dices);
     await customLog(`Well, let's look at your chances of success 🎰 in rolling the dice! 🥸`)
-    const header = dices.map(dice => dice.toString())
+    const header = dices.map(dice => dice.dice.toString())
     const table = new Table({ head: ['User dice v', ...header] });
     dices.forEach(dice => {
-      const leftHeader = dice.toString();
+      const leftHeader = dice.dice.toString();
       const row: string[] = [];
       dices.forEach(el => row.push(this.probabilityCalculator.calculationProbability(dice.dice, el.dice)))
       table.push(
