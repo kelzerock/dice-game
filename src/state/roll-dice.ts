@@ -39,9 +39,10 @@ export class RollDice implements GameState {
     } else {
       player = this.isUserFirst ? 'my' : 'your'
     }
-    await customLog(`It's time for ${player} roll.`);
-    await customLog(`I selected a random value in the range 0..${maxIndex}`);
-    await customLog(`My HMAC(${hmac})`);
+    await customLog([
+      `It's time for ${player} roll.`,
+      `I selected a random value in the range 0..${maxIndex}`,
+      `My HMAC(${hmac})`]);
     const userNumber = await this.askWithDataDices(context);
     const moduleForOperation = maxIndex + STEP;
     const moduleResult = (parseInt(computerNumber) + parseInt(userNumber)) % moduleForOperation;
@@ -49,11 +50,12 @@ export class RollDice implements GameState {
     type === 'first'
       ? this.result.firstPlayer = result
       : this.result.secondPlayer = result;
-    await customLog(`My number is - ${computerNumber}`);
-    await customLog(`Key(${key})`);
-    await customLog(`Your selection is - ${userNumber}`);
-    await customLog(`The fair number generation result is ${computerNumber} + ${userNumber} = ${moduleResult} (mod ${moduleForOperation}).`);
-    await customLog(`${player} roll result is ${result}.`);
+    await customLog([
+      `My number is - ${computerNumber}`,
+      `Key(${key})`,
+      `Your selection is - ${userNumber}`,
+      `The fair number generation result is ${computerNumber} + ${userNumber} = ${moduleResult} (mod ${moduleForOperation}).`,
+      `${player} roll result is ${result}.`]);
     return result;
   }
 
@@ -73,8 +75,7 @@ export class RollDice implements GameState {
       for (const num of rightAnswer) {
         await customLog(`${num} - ${num}`)
       }
-      await customLog(`X - exit 💨`)
-      await customLog(`? - help 🚑`)
+      await customLog([`X - exit 💨`, `? - help 🚑`])
       answer = await context.rl.askQuestion(``);
     }
     answer = answer.toLowerCase();

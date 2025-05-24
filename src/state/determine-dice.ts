@@ -1,6 +1,8 @@
 import { GameContext } from "..";
 import { GameState } from "../models/interfaces/game-state";
+import { assertionValidAnswer } from "../utils/assertion-valid-answer";
 import { customLog } from "../utils/custom-log";
+import { isValidAnswer } from "../utils/is-valid-answer";
 import { RollDice } from "./roll-dice";
 
 export class DetermineDice implements GameState {
@@ -24,30 +26,27 @@ export class DetermineDice implements GameState {
 
   async askWithDataDices(context: GameContext) {
     const dices = this.filterDices(context.state.computerDice, context.state.dices);
-    const rightAnswer = [...Array.from({ length: dices.length }, (_, i) => i.toString()), 'x'];
+    const rightAnswer = [...Array.from({ length: dices.length }, (_, i) => i.toString()), 'x'] as const;
     await customLog(`Choose your dice:`)
     for (const [ind, dice] of dices.entries()) {
       await customLog(`${ind} - [${dice.join(", ")}]`)
     }
-    await customLog(`X - exit`)
-    await customLog(`? - help`)
+    await customLog([`X - exit`, `? - help`])
     let answer = await context.rl.askQuestion(``);
-    while (typeof answer === "string" && !rightAnswer.includes(answer.toLowerCase())) {
+    while (typeof answer === "string" && !isValidAnswer(answer, rightAnswer)) {
       if (answer === '?') await context.helpInfo();
       await customLog(`Hey dude 🫵 don't cheating, just input one of the next option👇:`)
       for (const [ind, dice] of dices.entries()) {
         await customLog(`${ind} - [${dice.join(", ")}]`)
       }
-      await customLog(`X - exit 💨`)
-      await customLog(`? - help 🚑`)
+      await customLog([`X - exit 💨`, `? - help 🚑`])
       answer = await context.rl.askQuestion(``);
       answer = answer.toLowerCase();
     }
+    assertionValidAnswer(answer, rightAnswer);
 
     if (answer === 'x') {
       context.exit();
-    } else if (answer === "?") {
-      context.helpInfo();
     } else {
       context.state.userDice.push(...dices[parseInt(answer)]);
       await customLog(`You choose the [${context.state.userDice}] dice.`);

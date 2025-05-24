@@ -32,8 +32,7 @@ export class DetermineFirstMove implements GameState {
       `? - help 🚑`
     ])
     let answer = await context.rl.askQuestion(``);
-
-    while (typeof answer === "string" && isValidAnswer(answer.toLowerCase(), this.rightAnswer)) {
+    while (typeof answer === "string" && !isValidAnswer(answer.toLowerCase(), this.rightAnswer)) {
       if (answer === '?') await context.helpInfo();
       await customLog([
         `Hey dude 🫵 don't cheating, just input one of the next option👇:`, `0 - 0`, `1 - 1`, `X - exit 💨`, `? - help 🚑`
