@@ -1,4 +1,5 @@
 import { GameContext } from "..";
+import { EXIT_WITH_MISTAKE } from "../constants/constants";
 import { GameState } from "../models/interfaces/game-state";
 import { ValidAnswer } from "../models/types/valid-answer";
 import { assertionValidAnswer } from "../utils/assertion-valid-answer";
@@ -40,8 +41,12 @@ export class DetermineFirstMove implements GameState {
       answer = await context.rl.askQuestion(``);
       answer = answer.toLowerCase();
     }
-    assertionValidAnswer(answer, this.rightAnswer)
-    return answer;
+    try {
+      assertionValidAnswer(answer, this.rightAnswer)
+      return answer;
+    } catch (error) {
+      context.exit(EXIT_WITH_MISTAKE);
+    }
   }
 
   private async handleAnswer(answer: ValidAnswer, key: string, computerNum: string, context: GameContext) {

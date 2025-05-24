@@ -1,4 +1,5 @@
 import { GameContext } from "..";
+import { EXIT_WITH_MISTAKE } from "../constants/constants";
 import { GameState } from "../models/interfaces/game-state";
 import { assertionValidAnswer } from "../utils/assertion-valid-answer";
 import { customLog } from "../utils/custom-log";
@@ -43,7 +44,12 @@ export class DetermineDice implements GameState {
       answer = await context.rl.askQuestion(``);
       answer = answer.toLowerCase();
     }
-    assertionValidAnswer(answer, rightAnswer);
+
+    try {
+      assertionValidAnswer(answer, rightAnswer);
+    } catch (error) {
+      context.exit(EXIT_WITH_MISTAKE)
+    }
 
     if (answer === 'x') {
       context.exit();

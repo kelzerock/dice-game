@@ -1,12 +1,13 @@
 import { GameContext } from "..";
 import { STEP } from "../constants/constants";
+import { Roll } from "../models/enums/roll";
 import { GameState } from "../models/interfaces/game-state";
 import { customLog } from "../utils/custom-log";
 import { ResetForNewGame } from "./reset-for-new-game";
 
 export class RollDice implements GameState {
   private isUserFirst: boolean = false;
-  private result: { firstPlayer: number, secondPlayer: number } = { firstPlayer: 0, secondPlayer: 0 }
+  private result: { userResult: number, computerResult: number } = { userResult: 0, computerResult: 0 }
 
   async handle(context: GameContext): Promise<void> {
     await customLog("It's time to roll dices!🎲🎲")
@@ -18,9 +19,9 @@ export class RollDice implements GameState {
 
   private async startRoll(context: GameContext) {
     this.isUserFirst = context.state.isUserFirst;
-    const firstResult = await this.roll(context, 'first');
-    const secondResult = await this.roll(context, 'second');
-    await this.finalResult(firstResult, secondResult);
+    await this.roll(context, Roll.first);
+    await this.roll(context, Roll.second);
+    await this.finalResult();
   }
 
   private computerChoose(context: GameContext, maxIndex: number): { computerNumber: string, key: string, hmac: string } {
@@ -29,16 +30,10 @@ export class RollDice implements GameState {
     return { computerNumber, key, hmac }
   }
 
-  private async roll(context: GameContext, type: "first" | "second"): Promise<number> {
+  private async roll(context: GameContext, type: Roll): Promise<void> {
     const maxIndex = context.state.computerDice.length - STEP;
-    const dice = this.isUserFirst ? context.state.userDice : context.state.computerDice;
     const { computerNumber, key, hmac } = this.computerChoose(context, maxIndex)
-    let player: string;
-    if (type === 'first') {
-      player = this.isUserFirst ? 'your' : 'my'
-    } else {
-      player = this.isUserFirst ? 'my' : 'your'
-    }
+    const { player, dice } = this.getPlayerData(context, type);
     await customLog([
       `It's time for ${player} roll.`,
       `I selected a random value in the range 0..${maxIndex}`,
@@ -47,16 +42,13 @@ export class RollDice implements GameState {
     const moduleForOperation = maxIndex + STEP;
     const moduleResult = (parseInt(computerNumber) + parseInt(userNumber)) % moduleForOperation;
     const result = dice[moduleResult];
-    type === 'first'
-      ? this.result.firstPlayer = result
-      : this.result.secondPlayer = result;
+    this.setResult(type, result);
     await customLog([
       `My number is - ${computerNumber}`,
       `Key(${key})`,
       `Your selection is - ${userNumber}`,
       `The fair number generation result is ${computerNumber} + ${userNumber} = ${moduleResult} (mod ${moduleForOperation}).`,
       `${player} roll result is ${result}.`]);
-    return result;
   }
 
   private async askWithDataDices(context: GameContext): Promise<string> {
@@ -87,21 +79,35 @@ export class RollDice implements GameState {
     }
   }
 
-  private async finalResult(firstResult: number, secondResult: number) {
-    if (this.result.firstPlayer === this.result.secondPlayer) {
-      await customLog(`It is very strange, but we don't have a winner (${firstResult} === ${secondResult})! 🙄`)
-    } else {
-      if (this.isUserFirst && this.result.firstPlayer > this.result.secondPlayer) {
-        await customLog(`You win (${firstResult} > ${secondResult})!🥈🏆🥉`)
-      } else if (this.isUserFirst && this.result.firstPlayer < this.result.secondPlayer) {
-        await customLog(`You lose 🥴 (${firstResult} < ${secondResult})! 🥉`)
-      } else if (!this.isUserFirst && this.result.firstPlayer > this.result.secondPlayer) {
-        await customLog(`You lose 🥴 (${firstResult} > ${secondResult})! 🥉`)
-      } else {
-        await customLog(`You win (${firstResult} < ${secondResult})!🥈🏆🥉`)
-      }
-    }
+  private async finalResult() {
+    const { userResult, computerResult } = this.result;
+
+    const message =
+      userResult === computerResult
+        ? `It is very strange, but we don't have a winner (${computerResult} === ${userResult})! 🙄`
+        : userResult > computerResult
+          ? `You win (${userResult} > ${computerResult})!🥈🏆🥉`
+          : `You lose 🥴 (${userResult} < ${computerResult})! 🥉`;
+
+    await customLog(message);
   }
 
+
+  private getPlayerData(context: GameContext, type: Roll) {
+    const isUserRolling = (type === Roll.first) === this.isUserFirst;
+    return {
+      player: isUserRolling ? "your" : "my",
+      dice: isUserRolling ? context.state.userDice : context.state.computerDice
+    };
+  }
+
+  private setResult(type: Roll, result: number) {
+    const isUserRolling = (type === Roll.first) === this.isUserFirst;
+    if (isUserRolling) {
+      this.result.userResult = result;
+    } else {
+      this.result.computerResult = result;
+    }
+  }
 
 }
